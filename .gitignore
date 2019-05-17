@@ -1,2 +1,7 @@
+# NodeJS
+.nodejs/
+node_modules/
+npm-debug.log
+
 # IDEA
 .idea/
