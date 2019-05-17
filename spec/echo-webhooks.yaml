@@ -1,0 +1,612 @@
+openapi: 3.0.2
+info:
+    title: Echo Webhooks
+    description: >
+        This API specification describes the webhook functionality of the Echo API. Webhooks allow apps to
+        receive HTTP callbacks in real-time when events happen in Echo. The [Webhook
+        call](#operation/WebhookCall) POST endpoint describes the requests a receiving endpoint can expect.
+
+
+        ### Creating an endpoint for webhooks
+
+
+        The receiving endpoint must:
+
+
+        - be accessible via an HTTPS address with a valid SSL certificate
+
+        - be able to correctly process `event` requests
+
+        - never send a response larger that `32KB`.
+
+
+        ### Receiving data
+
+
+        Echo will make a HTTP `POST` request to the configured webhook URL. All requests will be sent with
+        content type `application/json` and will contain an `event` message with a `data` property that is
+        specific to the type of event. Please refer to the [Webhook call](#operation/WebhookCall) POST
+        endpoint for details on the exact contents of the request body and headers.
+
+
+        *At least once* delivery is used. This means that events might be delivered multiple times, for
+        example as a result of [error handling](#error-handling). Endpoints can use the `X-Echo-Delivery-Id`
+        HTTP header to deduplicate events.
+
+
+        Echo supports Basic Authentication and Bearer tokens via the `Authorization` HTTP header. It is up to
+        the receiving endpoint to validate the credentials.
+
+
+        ### Responding to a webhook
+
+
+        Receiving endpoints must return a HTTP status code `2xx` to acknowledge it received the request. You
+        should return an empty body with your response.
+
+
+        Any other HTTP status codes indicates that you did not receive the webhook and will be considered an
+        error response. This includes HTTP `3xx` redirection codes, these will not be followed by Echo.
+        Endpoints must never send a response larger that `32KB`.
+
+
+        Receiving endpoints must respond to Echo within 10 seconds. If no response is received within 10
+        seconds, this will be considered an error response.
+
+
+        It is best practice to acknowledge webhook requests immediately, and defer processing of the request
+        (i.e. making additional network calls, performing complex logic, et cetera).
+
+
+        ### Error handling
+
+
+        If a request to the receiving endpoints fails, Echo will start a retry process. As a result of this,
+        events might be delivered multiple times (for example when an endpoint _did_ receive a message, but
+        _did not_ respond within 10 seconds). Endpoints can use the `X-Echo-Delivery-Id` HTTP header to
+        deduplicate events.
+
+
+        Echo might drop events if a certain delivery queue size threshold is exceeded due to retries. The
+        oldest events will be dropped first. When endpoints are down for an extended period of time, they
+        might be automatically disabled.
+
+
+        Endpoints are responsible for discarding events that are not relevant anymore. For example, events
+        that are bound to a certain time (e.g. a scheduled activity from a timetable) that has already passed
+        should not be forwarded to end-users.
+
+        # Authentication
+
+        Receiving endpoints can implement two types of authentication:
+
+          - Basic HTTP Authentication
+          - Authentication using Bearer tokens
+
+        <security-definitions />
+    contact:
+        name: API Support
+        url: 'https://mytimetable.net'
+        email: support@eveoh.nl
+    version: 1.0.0
+servers:
+    -   url: 'https://{baseUrl}'
+        description: The URL of your server listening for Webhook calls.
+        variables:
+            baseUrl:
+                default: example.org
+paths:
+    /:
+        description: ''
+        post:
+            tags:
+                - Calls
+            summary: Webhook call
+            description: |-
+                Use webhooks to be notified about events that happen in Echo.
+
+                Echo can send webhook events that notify your application any time an event happens.
+            operationId: WebhookCall
+            parameters:
+                -   name: X-Echo-Delivery-Id
+                    in: header
+                    description: >-
+                        A unique identifier to identify the delivery. This value can be used to deduplicate
+                        deliveries if they are sent multiple times, for example as a result of [error
+                        handling](#error-handling).
+                    required: true
+                    schema:
+                        format: uuid
+                        type: string
+                        example: c09167dd-9cda-4011-b152-8d4af7785ce6
+                -   name: User-Agent
+                    in: header
+                    description: User agent of the Echo client.
+                    required: true
+                    schema:
+                        type: string
+                        example: Echo-Webhook-Client/1.0.0
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/event'
+                required: true
+            responses:
+                '200':
+                    description: >-
+                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it received
+                        the request.
+                '201':
+                    description: >-
+                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it received
+                        the request.
+                '202':
+                    description: >-
+                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it received
+                        the request.
+                '204':
+                    description: >-
+                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it received
+                        the request.
+            security:
+                -   http_basic_auth: []
+                -   http_bearer: []
+components:
+    schemas:
+        event_notification_batch_created:
+            allOf:
+                -   $ref: '#/components/schemas/event'
+                -   type: object
+                    properties:
+                        data:
+                            $ref: '#/components/schemas/notification_batch'
+        schedule_date:
+            title: Schedule date
+            description: >-
+                Represents a date in a schedule.
+
+
+                Either `date` or `dateTime` is set.  When `dateTime` is returned, `date` is set to null, and
+                vice versa.
+
+
+                `date` is used if this is an all-day event, otherwise `dateTime` is used.
+            type: object
+            properties:
+                date:
+                    format: date
+                    description: 'A date represented as a string in ISO8601 date format. Format used: `YYYY-MM-DD`.'
+                    type: string
+                    nullable: true
+                    example: '2019-04-23'
+                dateTime:
+                    format: date-time
+                    description: >-
+                        A date-time represented as a string in ISO8601 combined date and time format
+                        (including timezone). Format used: `YYYY-MM-DDThh:mm±hh:mm`.
+                    type: string
+                    nullable: true
+                    example: '2019-04-23T08:45+02:00'
+        timetable_change_source_timetable:
+            title: Changed timetable
+            description: |-
+                A reference to the timetable that has been changed.
+
+                `name` is a localized string of the timetable name.
+            type: object
+            properties:
+                id:
+                    description: The ID of the timetable that has been changed.
+                    type: string
+                    example: 2019!student!23452
+                name:
+                    $ref: '#/components/schemas/localized_string'
+        schedule:
+            title: Schedule
+            description: |-
+                A schedule of a timetabled event.
+
+                `start` and `end` both return either `dateTime` or `date`.
+            type: object
+            properties:
+                start:
+                    $ref: '#/components/schemas/schedule_date'
+                end:
+                    $ref: '#/components/schemas/schedule_date'
+                multiDay:
+                    description: True if the timetabled event spans multiple days.
+                    type: boolean
+            nullable: true
+            example:
+                start:
+                    dateTime: '2019-04-23T08:45+01:00'
+                end:
+                    dateTime: '2019-04-23T09:45+01:00'
+                multiDay: false
+        timetable_change_event_attribute:
+            title: Changed event attribute
+            description: |-
+                Represents an attribute of an event that has been changed.
+
+                `label` is a localized string of the attribute label.
+
+                `old` is a localized string of the old attribute value.
+
+                `new` is a localized string of the new attribute value.
+            type: object
+            properties:
+                name:
+                    description: Unique name of the attribute.
+                    type: string
+                    example: location
+                label:
+                    $ref: '#/components/schemas/localized_string'
+                new:
+                    $ref: '#/components/schemas/localized_string'
+                old:
+                    $ref: '#/components/schemas/localized_string'
+        timetable_change_event:
+            title: Timetable changed event
+            description: >-
+                A changed event in a timetable.
+
+
+                `name` is a localized string of the event name.
+
+
+                `attributes` contains all changed attributes for this event, for example the location when an
+                event has been moved to another location.
+
+
+                Only one of the `created`, `updated` and `removed` properties can be true.
+
+
+                - When `created` is `true`, `oldSchedule` is `null`. `newSchedule` contains the date of the
+                current scheduled event.
+
+                - When `updated` is `true`, `newSchedule` contains the date of the rescheduled event.
+                `oldSchedule` contains the date of the old event.
+
+                - When `removed` is `true`, `newSchedule` is `null`. `oldSchedule` contains the date of the
+                unscheduled event.
+
+
+                When `scheduleUpdated` is `true`, the event is either created, updated or removed.
+            type: object
+            properties:
+                id:
+                    description: The ID of the event that has been changed.
+                    type: string
+                    example: 2019!9347347
+                created:
+                    description: True if the timetabled event is a newly created one.
+                    type: boolean
+                    example: false
+                updated:
+                    description: True if an existing timetabled event has been updated.
+                    type: boolean
+                    example: false
+                removed:
+                    description: True if an timetabled event has been unscheduled.
+                    type: boolean
+                    example: false
+                scheduleUpdated:
+                    description: True if an existing timetabled event has been moved.
+                    type: boolean
+                    example: false
+                name:
+                    $ref: '#/components/schemas/localized_string'
+                oldSchedule:
+                    $ref: '#/components/schemas/schedule'
+                newSchedule:
+                    $ref: '#/components/schemas/schedule'
+                attributes:
+                    description: An array of changed attributes for this event.
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/timetable_change_event_attribute'
+        notification_batch:
+            title: Notification batch
+            description: A batch of notifications.
+            type: object
+            properties:
+                type:
+                    description: The type of notifications in this batch.
+                    type: string
+                user:
+                    description: Targeted user for the notification.
+                    type: string
+                    example: john.doe@example.org
+                notifications:
+                    description: The notifications in this batch.
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/notification'
+        event_ping:
+            allOf:
+                -   $ref: '#/components/schemas/event'
+                -   type: object
+                    properties:
+                        data:
+                            $ref: '#/components/schemas/ping_response'
+        event:
+            title: Event
+            description: An event triggered
+            type: object
+            properties:
+                id:
+                    format: uuid
+                    description: Unique identifier for the event.
+                    type: string
+                    example: f9d421d5-63e3-4724-8a21-d7d81d81417a
+                type:
+                    description: 'Type of the event. See [Events](#tag/Events) for a description of all types.'
+                    type: string
+            discriminator:
+                propertyName: type
+                mapping:
+                    notification_batch.created: '#/components/schemas/event_notification_batch_created'
+                    ping: '#/components/schemas/event_ping'
+        ping_response:
+            title: Ping
+            description: Ping response. Always returns `true`.
+            type: object
+            properties:
+                ping:
+                    type: boolean
+                    example: true
+        notification:
+            title: Notification
+            description: >-
+                Represents a notification that can be sent to a user.
+
+
+                A notification is targeted to one user. The priority of a notification can be one of the
+                following:
+
+
+                - `LOW`
+
+                - `DEFAULT`
+
+                - `HIGH`
+
+
+                A notification contains a payload that depends on the type of notification sent. The
+                notification type can be one of the following:
+
+                - `timetable_change`
+            type: object
+            properties:
+                id:
+                    format: uuid
+                    description: Unique identifier of the notification.
+                    type: string
+                    example: ef67d9ac-f97c-4a76-b914-8104aa537c0e
+                priority:
+                    description: Priority of the notification.
+                    enum:
+                        - LOW
+                        - DEFAULT
+                        - HIGH
+                    type: string
+                    example: DEFAULT
+                timestamp:
+                    format: date-time
+                    description: >-
+                        Time at which the notification was created.
+
+                        A date-time represented as a string in ISO8601 combined date and time format
+                        (including timezone). Format used: `YYYY-MM-DDThh:mm:ss.sss±hh:mm`.
+                    type: string
+                    example: '2019-04-23T08:45:23.000+01:00'
+                type:
+                    description: Type of the notification.
+                    type: string
+                user:
+                    description: Targeted user for the notification.
+                    type: string
+                    example: john.doe@example.org
+            discriminator:
+                propertyName: type
+                mapping:
+                    timetable_change: '#/components/schemas/notification_timetable_change'
+        notification_timetable_change:
+            allOf:
+                -   $ref: '#/components/schemas/notification'
+                -   type: object
+                    properties:
+                        payload:
+                            description: >-
+                                The payload of the notification.
+
+
+                                The payload of the `timetable_change` type describes a change in a user's
+                                timetable.
+                            type: object
+                            properties:
+                                event:
+                                    $ref: '#/components/schemas/timetable_change_event'
+                                timetable:
+                                    $ref: '#/components/schemas/timetable_change_source_timetable'
+                                viewTimetableUrl:
+                                    format: uri
+                                    description: URL where the user can view the timetable.
+                                    type: string
+                                    example: 'https://mytimetable.example.org'
+        localized_string:
+            title: Localized string
+            description: >-
+                Represents a String in multiple locales.
+
+
+                This map always contains a representation in the default locale, using the `defaultValue`
+                property. Other locales might be included as well in the `localizedValues` map. Locale keys
+                are represented as [BCP47](https://tools.ietf.org/html/bcp47) language tags.
+            type: object
+            properties:
+                '@type':
+                    description: The type of this object. Value is always 'localized_string'.
+                    type: string
+                    example: localized_string
+                defaultValue:
+                    description: String represented in the default locale.
+                    type: string
+                localizedValues:
+                    description: >-
+                        Map containing the localized values. Locale keys are represented as
+                        [BCP47](https://tools.ietf.org/html/bcp47) language tags.
+                    type: object
+                    additionalProperties:
+                        type: string
+            example:
+                '@type': localized_string
+                defaultValue: This is a localised message.
+                localizedValues:
+                    en-GB: This is a localised message.
+                    en-US: This is a localized message.
+                    nl: Dit is een gelokaliseerd bericht.
+    securitySchemes:
+        http_basic_auth:
+            type: http
+            description: |-
+                Basic HTTP Authentication.
+
+                As per [RFC 7617](https://tools.ietf.org/html/rfc7617).
+            scheme: basic
+        http_bearer:
+            type: http
+            description: |-
+                Authentication using Bearer tokens.
+
+                As per [RFC 6750](https://tools.ietf.org/html/rfc6750).
+            scheme: bearer
+tags:
+    -   name: Events
+        description: |-
+            The following event types are supported:
+
+            - `notification_batch.created`
+            - `ping`
+
+            ### Example request bodies
+
+            #### notification_batch.created
+
+            ````json
+            {
+                "id": "f9d421d5-63e3-4724-8a21-d7d81d81417a",
+                "type": "notification_batch.created",
+                "data": {
+                    "type": "timetable_change",
+                    "user": "john.doe@example.org",
+                    "notifications": [
+                        {
+                            "id": "ef67d9ac-f97c-4a76-b914-8104aa537c0e",
+                            "priority": "HIGH",
+                            "timestamp": "2019-04-23T08:45:23.000+01:00",
+                            "type": "timetable_change",
+                            "user": "john.doe@example.org",
+                            "payload": {
+                                "event": {
+                                    "id": "2019!9347347",
+                                    "created": false,
+                                    "updated": true,
+                                    "removed": false,
+                                    "scheduleUpdated": true,
+                                    "name": {
+                                        "@type": "localized_string",
+                                        "defaultValue": "M-1423 - Linear algebra 101",
+                                        "localizedValues": {
+                                          "en-GB": "M-1423 - Linear algebra 101",
+                                          "en-US": "M-1423 - Linear algebra 101",
+                                          "nl": "M-1423 - Lineaire algebra 101."
+                                        }
+                                    },
+                                    "oldSchedule": {
+                                        "start": {
+                                            "dateTime": "2019-04-23T08:45+01:00",
+                                            "date": null
+                                        },
+                                        "end": {
+                                            "dateTime": "2019-04-23T09:45+01:00",
+                                            "date": null
+                                        },
+                                        "multiDay": false
+                                    },
+                                    "newSchedule": {
+                                        "start": {
+                                            "dateTime": null,
+                                            "date": "2019-04-23"
+                                        },
+                                        "end": {
+                                            "dateTime": null,
+                                            "date": "2019-04-25"
+                                        },
+                                        "multiDay": true
+                                    },
+                                    "attributes": [
+                                        {
+                                            "name": "location",
+                                            "label": {
+                                                "@type": "localized_string",
+                                                "defaultValue": "Room(s)",
+                                                "localizedValues": {
+                                                  "en-GB": "Room(s)",
+                                                  "en-US": "Room(s)",
+                                                  "nl": "Ruimte(s)"
+                                                }
+                                            },
+                                            "new": {
+                                                "@type": "localized_string",
+                                                "defaultValue": "C1.241",
+                                                "localizedValues": {
+                                                  "en-GB": "C1.241",
+                                                  "en-US": "C1.241",
+                                                  "nl": "C1.241"
+                                                }
+                                            },
+                                            "old": {
+                                                "@type": "localized_string",
+                                                "defaultValue": "C2.021",
+                                                "localizedValues": {
+                                                  "en-GB": "C2.021",
+                                                  "en-US": "C2.021",
+                                                  "nl": "C2.021"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                },
+                                "timetable": {
+                                    "id": "2019!student!23452",
+                                    "name": {
+                                        "@type": "localized_string",
+                                        "defaultValue": "John Doe (23452)",
+                                        "localizedValues": {
+                                          "en-GB": "John Doe (23452)",
+                                          "en-US": "John Doe (23452)",
+                                          "nl": "John Doe (23452)"
+                                        }
+                                    }
+                                },
+                                "viewTimetableUrl": "https://mytimetable.example.org"
+                            }
+                        }
+                    ]
+                }
+            }
+            ````
+
+            #### ping
+
+            ````json
+            {
+                "id": "f9d421d5-63e3-4724-8a21-d7d81d81417a",
+                "type": "ping",
+                "data": {
+                    "ping": true
+                }
+            }
+            ````
