@@ -426,7 +426,9 @@ components:
             type: object
             properties:
                 '@type':
-                    description: The type of this object. Value is always 'localized_string'.
+                    description: >-
+                        The type of this object. This property can be used as a hint while parsing. Value is always
+                        'localized_string'.
                     type: string
                     example: localized_string
                 defaultValue:
