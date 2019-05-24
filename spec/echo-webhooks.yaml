@@ -290,7 +290,8 @@ components:
             type: object
             properties:
                 type:
-                    description: The type of notifications in this batch.
+                    description: >-
+                        The type of notifications in this batch. All notifications in this batch have this type.
                     type: string
                 user:
                     description: Targeted user for the notification.
