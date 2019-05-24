@@ -88,7 +88,7 @@ info:
         name: API Support
         url: 'https://mytimetable.net'
         email: support@eveoh.nl
-    version: 1.0.0
+    version: 1.0.1
 servers:
     -   url: 'https://{baseUrl}'
         description: The URL of your server listening for Webhook calls.
@@ -193,7 +193,8 @@ components:
             description: |-
                 A reference to the timetable that has been changed.
 
-                `name` is a localized string of the timetable name.
+                `name` is a localized string of the timetable name, providing a user friendly description of the
+                timetable.
             type: object
             properties:
                 id:
@@ -224,35 +225,13 @@ components:
                 end:
                     dateTime: '2019-04-23T09:45+01:00'
                 multiDay: false
-        timetable_change_event_attribute:
-            title: Changed event attribute
-            description: |-
-                Represents an attribute of an event that has been changed.
-
-                `label` is a localized string of the attribute label.
-
-                `old` is a localized string of the old attribute value.
-
-                `new` is a localized string of the new attribute value.
-            type: object
-            properties:
-                name:
-                    description: Unique name of the attribute.
-                    type: string
-                    example: location
-                label:
-                    $ref: '#/components/schemas/localized_string'
-                new:
-                    $ref: '#/components/schemas/localized_string'
-                old:
-                    $ref: '#/components/schemas/localized_string'
         timetable_change_event:
             title: Timetable changed event
             description: >-
                 A changed event in a timetable.
 
 
-                `name` is a localized string of the event name.
+                `name` is a localized string of the event name, providing a user friendly description of the event.
 
 
                 `attributes` contains all changed attributes for this event, for example the location when an
@@ -260,6 +239,10 @@ components:
 
 
                 Only one of the `created`, `updated` and `removed` properties can be true.
+
+
+                `oldSchedule` refers to when the old activity was scheduled, `newSchedule` to when the new activity is
+                scheduled. Their behaviour is as follows:
 
 
                 - When `created` is `true`, `oldSchedule` is `null`. `newSchedule` contains the date of the
@@ -270,6 +253,19 @@ components:
 
                 - When `removed` is `true`, `newSchedule` is `null`. `oldSchedule` contains the date of the
                 unscheduled event.
+
+
+                For the `attributes` property, the behaviour is as follows:
+
+
+                - When `created` is `true`, `attributes` contains all new attribute values. Since there are no
+                old values, these will all be set to `null`.
+
+                - When `updated` is `true`, `attributes` contains all changed attribute values. Attribute
+                values that have not changed will not be included. New values can be null.
+
+                - When `removed` is `true`, `attributes` does not contain any values. In a future
+                implementation, `attributes` might include the old values of the attributes.
 
 
                 When `scheduleUpdated` is `true`, the event is either created, updated or removed.
@@ -292,7 +288,7 @@ components:
                     type: boolean
                     example: false
                 scheduleUpdated:
-                    description: True if an existing timetabled event has been moved.
+                    description: True if an existing timetabled event has been rescheduled.
                     type: boolean
                     example: false
                 name:
@@ -312,7 +308,8 @@ components:
             type: object
             properties:
                 type:
-                    description: The type of notifications in this batch.
+                    description: >-
+                        The type of notifications in this batch. All notifications in this batch have this type.
                     type: string
                 user:
                     description: Targeted user for the notification.
@@ -432,7 +429,7 @@ components:
                                     $ref: '#/components/schemas/timetable_change_source_timetable'
                                 viewTimetableUrl:
                                     format: uri
-                                    description: URL where the user can view the timetable.
+                                    description: URL where the user can view their timetable.
                                     type: string
                                     example: 'https://mytimetable.example.org'
         localized_string:
@@ -441,13 +438,16 @@ components:
                 Represents a String in multiple locales.
 
 
-                This map always contains a representation in the default locale, using the `defaultValue`
-                property. Other locales might be included as well in the `localizedValues` map. Locale keys
-                are represented as [BCP47](https://tools.ietf.org/html/bcp47) language tags.
+                This object always contains a representation in the default locale, using the `defaultValue`
+                property. Other locales might be included as well in the `localizedValues` map (which does not
+                include the default locale). Locale keys are represented as
+                [BCP47](https://tools.ietf.org/html/bcp47) language tags.
             type: object
             properties:
                 '@type':
-                    description: The type of this object. Value is always 'localized_string'.
+                    description: >-
+                        The type of this object. This property can be used as a hint while parsing. Value is always
+                        'localized_string'.
                     type: string
                     example: localized_string
                 defaultValue:
@@ -455,7 +455,8 @@ components:
                     type: string
                 localizedValues:
                     description: >-
-                        Map containing the localized values. Locale keys are represented as
+                        Map containing additional localized values. The default locale is not included, so
+                        this map can be empty. Locale keys are represented as
                         [BCP47](https://tools.ietf.org/html/bcp47) language tags.
                     type: object
                     additionalProperties:
@@ -464,9 +465,34 @@ components:
                 '@type': localized_string
                 defaultValue: This is a localised message.
                 localizedValues:
-                    en-GB: This is a localised message.
                     en-US: This is a localized message.
                     nl: Dit is een gelokaliseerd bericht.
+        timetable_change_event_attribute:
+            title: Changed event attribute
+            description: |-
+                Represents an attribute of an event that has been changed.
+
+                `label` is a localized string of the attribute label.
+
+                `old` is a localized string of the old attribute value.
+
+                `new` is a localized string of the new attribute value.
+            type: object
+            properties:
+                name:
+                    description: Unique name of the attribute.
+                    type: string
+                    example: location
+                label:
+                    $ref: '#/components/schemas/localized_string'
+                new:
+                    allOf:
+                        -   $ref: '#/components/schemas/localized_string'
+                        -   nullable: true
+                old:
+                    allOf:
+                        -   $ref: '#/components/schemas/localized_string'
+                        -   nullable: true
     securitySchemes:
         http_basic_auth:
             type: http
@@ -519,7 +545,6 @@ tags:
                                         "@type": "localized_string",
                                         "defaultValue": "M-1423 - Linear algebra 101",
                                         "localizedValues": {
-                                          "en-GB": "M-1423 - Linear algebra 101",
                                           "en-US": "M-1423 - Linear algebra 101",
                                           "nl": "M-1423 - Lineaire algebra 101."
                                         }
@@ -553,7 +578,6 @@ tags:
                                                 "@type": "localized_string",
                                                 "defaultValue": "Room(s)",
                                                 "localizedValues": {
-                                                  "en-GB": "Room(s)",
                                                   "en-US": "Room(s)",
                                                   "nl": "Ruimte(s)"
                                                 }
@@ -562,7 +586,6 @@ tags:
                                                 "@type": "localized_string",
                                                 "defaultValue": "C1.241",
                                                 "localizedValues": {
-                                                  "en-GB": "C1.241",
                                                   "en-US": "C1.241",
                                                   "nl": "C1.241"
                                                 }
@@ -571,7 +594,6 @@ tags:
                                                 "@type": "localized_string",
                                                 "defaultValue": "C2.021",
                                                 "localizedValues": {
-                                                  "en-GB": "C2.021",
                                                   "en-US": "C2.021",
                                                   "nl": "C2.021"
                                                 }
@@ -585,7 +607,6 @@ tags:
                                         "@type": "localized_string",
                                         "defaultValue": "John Doe (23452)",
                                         "localizedValues": {
-                                          "en-GB": "John Doe (23452)",
                                           "en-US": "John Doe (23452)",
                                           "nl": "John Doe (23452)"
                                         }
