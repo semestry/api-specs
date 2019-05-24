@@ -240,6 +240,9 @@ components:
                 Only one of the `created`, `updated` and `removed` properties can be true.
 
 
+                For the `oldSchedule` and `newSchedule` properties, the behaviour is as follows:
+
+
                 - When `created` is `true`, `oldSchedule` is `null`. `newSchedule` contains the date of the
                 current scheduled event.
 
@@ -248,6 +251,19 @@ components:
 
                 - When `removed` is `true`, `newSchedule` is `null`. `oldSchedule` contains the date of the
                 unscheduled event.
+
+
+                For the `attributes` property, the behaviour is as follows:
+
+
+                - When `created` is `true`, `attributes` contains all new attribute values. Since there are no
+                old values, these will all be set to `null`.
+
+                - When `updated` is `true`, `attributes` contains all changed attribute values. Attribute
+                values that have not changed will not be included. New values can be null.
+
+                - When `removed` is `true`, `attributes` does not contain any values. In a future
+                implementation, `attributes` might include the old values of the attributes.
 
 
                 When `scheduleUpdated` is `true`, the event is either created, updated or removed.
