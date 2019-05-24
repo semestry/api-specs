@@ -224,28 +224,6 @@ components:
                 end:
                     dateTime: '2019-04-23T09:45+01:00'
                 multiDay: false
-        timetable_change_event_attribute:
-            title: Changed event attribute
-            description: |-
-                Represents an attribute of an event that has been changed.
-
-                `label` is a localized string of the attribute label.
-
-                `old` is a localized string of the old attribute value.
-
-                `new` is a localized string of the new attribute value.
-            type: object
-            properties:
-                name:
-                    description: Unique name of the attribute.
-                    type: string
-                    example: location
-                label:
-                    $ref: '#/components/schemas/localized_string'
-                new:
-                    $ref: '#/components/schemas/localized_string'
-                old:
-                    $ref: '#/components/schemas/localized_string'
         timetable_change_event:
             title: Timetable changed event
             description: >-
@@ -467,6 +445,32 @@ components:
                     en-GB: This is a localised message.
                     en-US: This is a localized message.
                     nl: Dit is een gelokaliseerd bericht.
+        timetable_change_event_attribute:
+            title: Changed event attribute
+            description: |-
+                Represents an attribute of an event that has been changed.
+
+                `label` is a localized string of the attribute label.
+
+                `old` is a localized string of the old attribute value.
+
+                `new` is a localized string of the new attribute value.
+            type: object
+            properties:
+                name:
+                    description: Unique name of the attribute.
+                    type: string
+                    example: location
+                label:
+                    $ref: '#/components/schemas/localized_string'
+                new:
+                    allOf:
+                        -   $ref: '#/components/schemas/localized_string'
+                        -   nullable: true
+                old:
+                    allOf:
+                        -   $ref: '#/components/schemas/localized_string'
+                        -   nullable: true
     securitySchemes:
         http_basic_auth:
             type: http
