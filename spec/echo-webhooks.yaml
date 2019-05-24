@@ -193,7 +193,8 @@ components:
             description: |-
                 A reference to the timetable that has been changed.
 
-                `name` is a localized string of the timetable name.
+                `name` is a localized string of the timetable name, providing a user friendly description of the
+                timetable.
             type: object
             properties:
                 id:
@@ -230,7 +231,7 @@ components:
                 A changed event in a timetable.
 
 
-                `name` is a localized string of the event name.
+                `name` is a localized string of the event name, providing a user friendly description of the event.
 
 
                 `attributes` contains all changed attributes for this event, for example the location when an
@@ -240,7 +241,8 @@ components:
                 Only one of the `created`, `updated` and `removed` properties can be true.
 
 
-                For the `oldSchedule` and `newSchedule` properties, the behaviour is as follows:
+                `oldSchedule` refers to when the old activity was scheduled, `newSchedule` to when the new activity is
+                scheduled. Their behaviour is as follows:
 
 
                 - When `created` is `true`, `oldSchedule` is `null`. `newSchedule` contains the date of the
@@ -286,7 +288,7 @@ components:
                     type: boolean
                     example: false
                 scheduleUpdated:
-                    description: True if an existing timetabled event has been moved.
+                    description: True if an existing timetabled event has been rescheduled.
                     type: boolean
                     example: false
                 name:
@@ -427,7 +429,7 @@ components:
                                     $ref: '#/components/schemas/timetable_change_source_timetable'
                                 viewTimetableUrl:
                                     format: uri
-                                    description: URL where the user can view the timetable.
+                                    description: URL where the user can view their timetable.
                                     type: string
                                     example: 'https://mytimetable.example.org'
         localized_string:
