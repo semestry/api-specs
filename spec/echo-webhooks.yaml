@@ -419,9 +419,10 @@ components:
                 Represents a String in multiple locales.
 
 
-                This map always contains a representation in the default locale, using the `defaultValue`
-                property. Other locales might be included as well in the `localizedValues` map. Locale keys
-                are represented as [BCP47](https://tools.ietf.org/html/bcp47) language tags.
+                This object always contains a representation in the default locale, using the `defaultValue`
+                property. Other locales might be included as well in the `localizedValues` map (which does not
+                include the default locale). Locale keys are represented as
+                [BCP47](https://tools.ietf.org/html/bcp47) language tags.
             type: object
             properties:
                 '@type':
@@ -433,7 +434,8 @@ components:
                     type: string
                 localizedValues:
                     description: >-
-                        Map containing the localized values. Locale keys are represented as
+                        Map containing additional localized values. The default locale is not included, so
+                        this map can be empty. Locale keys are represented as
                         [BCP47](https://tools.ietf.org/html/bcp47) language tags.
                     type: object
                     additionalProperties:
@@ -442,7 +444,6 @@ components:
                 '@type': localized_string
                 defaultValue: This is a localised message.
                 localizedValues:
-                    en-GB: This is a localised message.
                     en-US: This is a localized message.
                     nl: Dit is een gelokaliseerd bericht.
         timetable_change_event_attribute:
@@ -523,7 +524,6 @@ tags:
                                         "@type": "localized_string",
                                         "defaultValue": "M-1423 - Linear algebra 101",
                                         "localizedValues": {
-                                          "en-GB": "M-1423 - Linear algebra 101",
                                           "en-US": "M-1423 - Linear algebra 101",
                                           "nl": "M-1423 - Lineaire algebra 101."
                                         }
@@ -557,7 +557,6 @@ tags:
                                                 "@type": "localized_string",
                                                 "defaultValue": "Room(s)",
                                                 "localizedValues": {
-                                                  "en-GB": "Room(s)",
                                                   "en-US": "Room(s)",
                                                   "nl": "Ruimte(s)"
                                                 }
@@ -566,7 +565,6 @@ tags:
                                                 "@type": "localized_string",
                                                 "defaultValue": "C1.241",
                                                 "localizedValues": {
-                                                  "en-GB": "C1.241",
                                                   "en-US": "C1.241",
                                                   "nl": "C1.241"
                                                 }
@@ -575,7 +573,6 @@ tags:
                                                 "@type": "localized_string",
                                                 "defaultValue": "C2.021",
                                                 "localizedValues": {
-                                                  "en-GB": "C2.021",
                                                   "en-US": "C2.021",
                                                   "nl": "C2.021"
                                                 }
@@ -589,7 +586,6 @@ tags:
                                         "@type": "localized_string",
                                         "defaultValue": "John Doe (23452)",
                                         "localizedValues": {
-                                          "en-GB": "John Doe (23452)",
                                           "en-US": "John Doe (23452)",
                                           "nl": "John Doe (23452)"
                                         }
