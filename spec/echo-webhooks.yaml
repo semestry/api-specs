@@ -263,7 +263,8 @@ components:
                 old values, these will all be set to `null`.
 
                 - When `updated` is `true`, `attributes` contains all changed attribute values. Attribute
-                values that have not changed will not be included. New values can be null.
+                values that have not changed will not be included. Old or new values can be null when an attribute
+                was added or removed.
 
                 - When `removed` is `true`, `attributes` does not contain any values. In a future
                 implementation, `attributes` might include the old values of the attributes.
