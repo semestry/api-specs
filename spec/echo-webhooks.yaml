@@ -208,7 +208,8 @@ components:
             description: |-
                 A schedule of a timetabled event.
 
-                `start` and `end` both return either `dateTime` or `date`.
+                `start` and `end` both return either `dateTime` (for regular events) or `date` (for all-day events).
+                `end` is inclusive in case of all-day events, exclusive otherwise.
             type: object
             properties:
                 start:
