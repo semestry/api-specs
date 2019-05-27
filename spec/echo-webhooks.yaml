@@ -268,8 +268,6 @@ components:
                 - When `removed` is `true`, `attributes` does not contain any values. In a future
                 implementation, `attributes` might include the old values of the attributes.
 
-
-                When `scheduleUpdated` is `true`, the event is either created, updated or removed.
             type: object
             properties:
                 id:
@@ -289,7 +287,7 @@ components:
                     type: boolean
                     example: false
                 scheduleUpdated:
-                    description: True if an existing timetabled event has been rescheduled.
+                    description: True if the event has been created, rescheduled or removed.
                     type: boolean
                     example: false
                 name:
