@@ -88,7 +88,7 @@ info:
         name: API Support
         url: 'https://mytimetable.net'
         email: support@eveoh.nl
-    version: 1.0.1
+    version: 1.0.2
 servers:
     -   url: 'https://{baseUrl}'
         description: The URL of your server listening for Webhook calls.
@@ -208,7 +208,8 @@ components:
             description: |-
                 A schedule of a timetabled event.
 
-                `start` and `end` both return either `dateTime` or `date`.
+                `start` and `end` both return either `dateTime` (for regular events) or `date` (for all-day events).
+                `end` is inclusive in case of all-day events, exclusive otherwise.
             type: object
             properties:
                 start:
@@ -262,13 +263,12 @@ components:
                 old values, these will all be set to `null`.
 
                 - When `updated` is `true`, `attributes` contains all changed attribute values. Attribute
-                values that have not changed will not be included. New values can be null.
+                values that have not changed will not be included. Old or new values can be null when an attribute
+                was added or removed.
 
                 - When `removed` is `true`, `attributes` does not contain any values. In a future
                 implementation, `attributes` might include the old values of the attributes.
 
-
-                When `scheduleUpdated` is `true`, the event is either created, updated or removed.
             type: object
             properties:
                 id:
@@ -288,7 +288,7 @@ components:
                     type: boolean
                     example: false
                 scheduleUpdated:
-                    description: True if an existing timetabled event has been rescheduled.
+                    description: True if the event has been created, rescheduled or removed.
                     type: boolean
                     example: false
                 name:
