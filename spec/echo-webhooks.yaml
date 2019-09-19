@@ -202,7 +202,7 @@ components:
                     type: string
                     example: 2019!student!23452
                 name:
-                    $ref: '#/components/schemas/localized_string'
+                    $ref: '#/components/schemas/LocalizedString'
         schedule:
             title: Schedule
             description: |-
@@ -292,7 +292,7 @@ components:
                     type: boolean
                     example: false
                 name:
-                    $ref: '#/components/schemas/localized_string'
+                    $ref: '#/components/schemas/LocalizedString'
                 oldSchedule:
                     $ref: '#/components/schemas/schedule'
                 newSchedule:
@@ -432,7 +432,7 @@ components:
                                     description: URL where the user can view their timetable.
                                     type: string
                                     example: 'https://mytimetable.example.org'
-        localized_string:
+        LocalizedString:
             description: String with representations in multiple locales.
             type: object
             properties:
@@ -476,14 +476,14 @@ components:
                     type: string
                     example: location
                 label:
-                    $ref: '#/components/schemas/localized_string'
+                    $ref: '#/components/schemas/LocalizedString'
                 new:
                     allOf:
-                        -   $ref: '#/components/schemas/localized_string'
+                        -   $ref: '#/components/schemas/LocalizedString'
                         -   nullable: true
                 old:
                     allOf:
-                        -   $ref: '#/components/schemas/localized_string'
+                        -   $ref: '#/components/schemas/LocalizedString'
                         -   nullable: true
     securitySchemes:
         http_basic_auth:
