@@ -84,6 +84,32 @@ info:
           - Authentication using Bearer tokens
 
         <security-definitions />
+
+        # Localization
+
+        Echo is currently unaware of the user's preferred locale. So when one wants to localize messages
+        presented to the user, let's say render notifications in an app, this localization needs to happen in
+        the app.
+
+        For this reason, API responses can include human-readable strings in multiple locales.
+
+        These are organised in the following `LocalizedString` object structure as documented below.
+
+        The API user can then select the representation in the desired locale.
+
+        It should check whether a locale-specific representation is available and fall back to the default
+        representation if unavailable.
+
+
+        This also means this datatype can be used in notification payloads when posting notifications to Echo.
+        Currently, when Echo renders notifications (for example, when sending email notifications) it uses
+        the representation for the default locale.
+
+        ### LocalizedString
+
+        String with representations in multiple locales.
+
+        <SchemaDefinition schemaRef="#/components/schemas/LocalizedString" />
     contact:
         name: API Support
         url: 'https://mytimetable.net'
