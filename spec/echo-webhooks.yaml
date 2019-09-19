@@ -346,13 +346,6 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/notification'
-        event_ping:
-            allOf:
-                -   $ref: '#/components/schemas/Event'
-                -   type: object
-                    properties:
-                        data:
-                            $ref: '#/components/schemas/ping_response'
         Event:
             title: Event
             description: An event triggered
@@ -370,7 +363,14 @@ components:
                 propertyName: type
                 mapping:
                     notification_batch.created: '#/components/schemas/Event_NotificationBatchCreated'
-                    ping: '#/components/schemas/event_ping'
+                    ping: '#/components/schemas/Event_Ping'
+        Event_Ping:
+            allOf:
+                -   $ref: '#/components/schemas/Event'
+                -   type: object
+                    properties:
+                        data:
+                            $ref: '#/components/schemas/ping_response'
         ping_response:
             title: Ping
             description: Ping response. Always returns `true`.
