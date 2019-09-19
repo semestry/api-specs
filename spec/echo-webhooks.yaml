@@ -433,31 +433,23 @@ components:
                                     type: string
                                     example: 'https://mytimetable.example.org'
         localized_string:
-            title: Localized string
-            description: >-
-                Represents a String in multiple locales.
-
-
-                This object always contains a representation in the default locale, using the `defaultValue`
-                property. Other locales might be included as well in the `localizedValues` map (which does not
-                include the default locale). Locale keys are represented as
-                [BCP47](https://tools.ietf.org/html/bcp47) language tags.
+            description: String with representations in multiple locales.
             type: object
             properties:
                 '@type':
                     description: >-
-                        The type of this object. This property can be used as a hint while parsing. Value is always
-                        'localized_string'.
+                        Type of this object, which is always `"localized_string"`. Can be used as a hint while parsing.
                     type: string
                     example: localized_string
                 defaultValue:
-                    description: String represented in the default locale.
+                    description: Representation for the default locale.
                     type: string
                 localizedValues:
                     description: >-
-                        Map containing additional localized values. The default locale is not included, so
-                        this map can be empty. Locale keys are represented as
-                        [BCP47](https://tools.ietf.org/html/bcp47) language tags.
+                        Object containing representations for additional locales. The representation for the default
+                        locale is not included, so this map can be empty. Attribute names are
+                        [BCP47](https://tools.ietf.org/html/bcp47) language tags and their values are the actual
+                        representations.
                     type: object
                     additionalProperties:
                         type: string
