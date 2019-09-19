@@ -186,7 +186,7 @@ components:
                 -   type: object
                     properties:
                         data:
-                            $ref: '#/components/schemas/notification_batch'
+                            $ref: '#/components/schemas/NotificationBatch'
         schedule_date:
             title: Schedule date
             description: >-
@@ -328,7 +328,7 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/timetable_change_event_attribute'
-        notification_batch:
+        NotificationBatch:
             title: Notification batch
             description: A batch of notifications.
             type: object
