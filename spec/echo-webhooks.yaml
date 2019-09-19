@@ -345,7 +345,7 @@ components:
                     description: The notifications in this batch.
                     type: array
                     items:
-                        $ref: '#/components/schemas/notification'
+                        $ref: '#/components/schemas/Notification'
         Event:
             title: Event
             description: An event triggered
@@ -379,7 +379,7 @@ components:
                 ping:
                     type: boolean
                     example: true
-        notification:
+        Notification:
             title: Notification
             description: >-
                 Represents a notification that can be sent to a user.
@@ -437,7 +437,7 @@ components:
                     timetable_change: '#/components/schemas/notification_timetable_change'
         notification_timetable_change:
             allOf:
-                -   $ref: '#/components/schemas/notification'
+                -   $ref: '#/components/schemas/Notification'
                 -   type: object
                     properties:
                         payload:
