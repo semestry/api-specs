@@ -180,7 +180,7 @@ paths:
                 -   http_bearer: []
 components:
     schemas:
-        event_notification_batch_created:
+        Event_NotificationBatchCreated:
             allOf:
                 -   $ref: '#/components/schemas/event'
                 -   type: object
@@ -369,7 +369,7 @@ components:
             discriminator:
                 propertyName: type
                 mapping:
-                    notification_batch.created: '#/components/schemas/event_notification_batch_created'
+                    notification_batch.created: '#/components/schemas/Event_NotificationBatchCreated'
                     ping: '#/components/schemas/event_ping'
         ping_response:
             title: Ping
