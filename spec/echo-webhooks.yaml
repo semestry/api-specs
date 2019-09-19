@@ -156,7 +156,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/event'
+                            $ref: '#/components/schemas/Event'
                 required: true
             responses:
                 '200':
@@ -182,7 +182,7 @@ components:
     schemas:
         Event_NotificationBatchCreated:
             allOf:
-                -   $ref: '#/components/schemas/event'
+                -   $ref: '#/components/schemas/Event'
                 -   type: object
                     properties:
                         data:
@@ -348,12 +348,12 @@ components:
                         $ref: '#/components/schemas/notification'
         event_ping:
             allOf:
-                -   $ref: '#/components/schemas/event'
+                -   $ref: '#/components/schemas/Event'
                 -   type: object
                     properties:
                         data:
                             $ref: '#/components/schemas/ping_response'
-        event:
+        Event:
             title: Event
             description: An event triggered
             type: object
