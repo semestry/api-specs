@@ -229,7 +229,7 @@ components:
                     example: 2019!student!23452
                 name:
                     $ref: '#/components/schemas/LocalizedString'
-        schedule:
+        Notification.Payload_TimetableChange.Schedule:
             title: Schedule
             description: |-
                 A schedule of a timetabled event.
@@ -320,9 +320,9 @@ components:
                 name:
                     $ref: '#/components/schemas/LocalizedString'
                 oldSchedule:
-                    $ref: '#/components/schemas/schedule'
+                    $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule'
                 newSchedule:
-                    $ref: '#/components/schemas/schedule'
+                    $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule'
                 attributes:
                     description: An array of changed attributes for this event.
                     type: array
