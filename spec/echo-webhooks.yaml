@@ -431,33 +431,24 @@ components:
                     description: Targeted user for the notification.
                     type: string
                     example: john.doe@example.org
-            discriminator:
-                propertyName: type
-                mapping:
-                    timetable_change: '#/components/schemas/notification_timetable_change'
+                payload:
+                    description: The payload of the notification.
+                    type: object
+                    example:
+                        ...: See 'Notification types' for example payloads per notification type.
         notification_timetable_change:
-            allOf:
-                -   $ref: '#/components/schemas/Notification'
-                -   type: object
-                    properties:
-                        payload:
-                            description: >-
-                                The payload of the notification.
-
-
-                                The payload of the `timetable_change` type describes a change in a user's
-                                timetable.
-                            type: object
-                            properties:
-                                event:
-                                    $ref: '#/components/schemas/timetable_change_event'
-                                timetable:
-                                    $ref: '#/components/schemas/timetable_change_source_timetable'
-                                viewTimetableUrl:
-                                    format: uri
-                                    description: URL where the user can view their timetable.
-                                    type: string
-                                    example: 'https://mytimetable.example.org'
+            title: timetable_change
+            type: object
+            properties:
+                event:
+                    $ref: '#/components/schemas/timetable_change_event'
+                timetable:
+                    $ref: '#/components/schemas/timetable_change_source_timetable'
+                viewTimetableUrl:
+                    format: uri
+                    description: URL where the user can view their timetable.
+                    type: string
+                    example: 'https://mytimetable.example.org'
         LocalizedString:
             description: String with representations in multiple locales.
             type: object
@@ -649,3 +640,30 @@ tags:
                 }
             }
             ````
+    -   name: WellKnownNotificationTypes
+        description: >-
+            Notification types are dynamic, so it would be impossible to list them here.
+
+            The contract is that sender and receiver should agree on the schema of the payload.
+
+            To facilitate this, we have defined some well-known notification types.
+
+
+            ## timetable_change
+
+
+            This type of notification indicates a change within the user's timetable.
+
+
+            One notification is sent per changed timetable event in a specific timetable, so when
+            multiple events change, multiple notifications are sent.
+
+            Also, when an event belongs to multiple timetables, multiple notifications are sent.
+
+            These notifications may or may not be grouped together in a batch.
+
+
+            ### payload
+
+            <SchemaDefinition schemaRef="#/components/schemas/notification_timetable_change" />
+        x-displayName: Well-known Notification Types
