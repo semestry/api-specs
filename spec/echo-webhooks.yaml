@@ -110,6 +110,55 @@ info:
         String with representations in multiple locales.
 
         <SchemaDefinition schemaRef="#/components/schemas/LocalizedString" />
+
+        # Events
+
+        Events are used to communicate when something interesting happens in Echo. For example, when a batch
+        of notifications is created, an `Event` with the type `notification_batch.created` is created.
+
+        ## Event types
+
+        These are the event types that currently exist:
+
+
+        | type                         | description                                                 |
+
+        |------------------------------|-------------------------------------------------------------|
+
+        | `notification_batch.created` | Event indicating one or more changes to a user's timetable. |
+
+        | `ping`                       | _Currently unused._                                         |
+
+
+        We may add more event types at any time, so in developing and maintaining your code, you should not
+        assume that only these types exist.
+
+        # Well-known Notification Types
+
+        Notification types are dynamic, so it would be impossible to list them here.
+
+        The contract is that sender and receiver should agree on the schema of the payload.
+
+        To facilitate this, we have defined some well-known notification types.
+
+
+        ## timetable_change
+
+
+        This type of notification indicates a change within the user's timetable.
+
+
+        One notification is sent per changed timetable event in a specific timetable, so when multiple events
+        change, multiple notifications are sent.
+
+        Also, when an event belongs to multiple timetables, multiple notifications are sent.
+
+        These notifications may or may not be grouped together in a batch.
+
+
+        ### payload
+
+        <SchemaDefinition schemaRef="#/components/schemas/Notification.Payload_TimetableChange" />
     contact:
         name: API Support
         url: 'https://mytimetable.net'
@@ -550,52 +599,4 @@ components:
                 As per [RFC 6750](https://tools.ietf.org/html/rfc6750).
             scheme: bearer
 tags:
-    -   name: Events
-        description: >-
-            Events are used to communicate when something interesting happens in Echo. For example, when a
-            batch of notifications is created, an `Event` with the type `notification_batch.created` is
-            created.
-
-            ### Event types
-
-            These are the event types that currently exist:
-
-
-            | type                         | description                                                 |
-
-            |------------------------------|-------------------------------------------------------------|
-
-            | `notification_batch.created` | Event indicating one or more changes to a user's timetable. |
-
-            | `ping`                       | _Currently unused._                                         |
-
-
-            We may add more event types at any time, so in developing and maintaining your code, you should
-            not assume that only these types exist.
-    -   name: WellKnownNotificationTypes
-        description: >-
-            Notification types are dynamic, so it would be impossible to list them here.
-
-            The contract is that sender and receiver should agree on the schema of the payload.
-
-            To facilitate this, we have defined some well-known notification types.
-
-
-            ## timetable_change
-
-
-            This type of notification indicates a change within the user's timetable.
-
-
-            One notification is sent per changed timetable event in a specific timetable, so when
-            multiple events change, multiple notifications are sent.
-
-            Also, when an event belongs to multiple timetables, multiple notifications are sent.
-
-            These notifications may or may not be grouped together in a batch.
-
-
-            ### payload
-
-            <SchemaDefinition schemaRef="#/components/schemas/Notification.Payload_TimetableChange" />
-        x-displayName: Well-known Notification Types
+    -   name: Calls
