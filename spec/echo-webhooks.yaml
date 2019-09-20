@@ -302,65 +302,116 @@ components:
                             type: string
                             example: 2019!9347347
                         created:
-                            description: True if the timetabled event is a newly created one.
+                            description: >-
+                                `true` if the event has been added to the timetable. Mutually exclusive with
+                                `updated` and `removed`.
+
+
+                                `newSchedule` contains the schedule of the newly created event. `attributes`
+                                contains all attributes. Since there are no old attribute values, they are
+                                all `null`.
                             type: boolean
                             example: false
                         updated:
-                            description: True if an existing timetabled event has been updated.
+                            description: >-
+                                `true` if the event already was and remains in the timetable. Mutually
+                                exclusive with `updated` and `removed`.
+
+
+                                `oldSchedule` contains the schedule of the event before the update,
+                                `newSchedule` contains the schedule of the event after the update.
+                                `attributes` only contains changed attributes. Old or new values can be
+                                `null` when an attribute was added or removed.
                             type: boolean
                             example: false
                         removed:
-                            description: True if an timetabled event has been unscheduled.
+                            description: >-
+                                `true` if the event has been removed from the timetable. Mutually exclusive
+                                with `updated` and `removed`.
+
+
+                                `oldSchedule` contains the schedule of the event before removal. `attributes`
+                                 is empty. In a future implementation, `attributes` might include the old
+                                 values.
                             type: boolean
                             example: false
                         scheduleUpdated:
-                            description: True if the event has been created, rescheduled or removed.
+                            description: >-
+                                `true` if the event has been `created`, `removed` or rescheduled (the start
+                                and/or end of the event has changed).
+
+
+                                `oldSchedule` contains the schedule of the event before removal or
+                                rescheduling. `newSchedule` contains the schedule of the event after creation
+                                 or rescheduling.
                             type: boolean
                             example: false
                         name:
-                            $ref: '#/components/schemas/LocalizedString'
+                            allOf:
+                                -   description: >-
+                                        Human-readable name of the event. See
+                                        [LocalizedString](#section/Localization).
+                                -   $ref: '#/components/schemas/LocalizedString'
                         oldSchedule:
-                            $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule'
+                            allOf:
+                                -   description: >-
+                                        The schedule of the event before it was removed or rescheduled.
+                                    nullable: true
+                                -   $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule'
                         newSchedule:
-                            $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule'
+                            allOf:
+                                -   description: >-
+                                        The schedule of the event after it has been created or rescheduled.
+                                    nullable: true
+                                -   $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule'
                         attributes:
                             description: An array of changed attributes for this event.
                             type: array
                             items:
-                                description: |-
-                                    Represents an attribute of an event that has been changed.
-
-                                    `label` is a localized string of the attribute label.
-
-                                    `old` is a localized string of the old attribute value.
-
-                                    `new` is a localized string of the new attribute value.
+                                description: >-
+                                    Represents a change in an attribute of an event. For example, this could
+                                    contain a location attribute when the event has been moved to another
+                                    location.
                                 type: object
                                 properties:
                                     name:
-                                        description: Unique name of the attribute.
+                                        description: Machine-readable name of the attribute.
                                         type: string
                                         example: location
                                     label:
-                                        $ref: '#/components/schemas/LocalizedString'
+                                        allOf:
+                                            -   description: >-
+                                                    Human-readable name of the attribute. See
+                                                    [LocalizedString](#section/Localization).
+                                            -   $ref: '#/components/schemas/LocalizedString'
                                     new:
                                         allOf:
+                                            -   description: >-
+                                                    The value of the attribute after the change. See
+                                                    [LocalizedString](#section/Localization).
+                                                nullable: true
                                             -   $ref: '#/components/schemas/LocalizedString'
-                                            -   nullable: true
                                     old:
                                         allOf:
+                                            -   description: >-
+                                                    The value of the attribute before the change. See
+                                                    [LocalizedString](#section/Localization).
+                                                nullable: true
                                             -   $ref: '#/components/schemas/LocalizedString'
-                                            -   nullable: true
                 timetable:
                     description: Timetable the changed event belongs to.
                     type: object
                     properties:
                         id:
-                            description: The ID of the timetable that has been changed.
+                            description: ID of the timetable the changed event belongs to.
                             type: string
                             example: 2019!student!23452
                         name:
-                            $ref: '#/components/schemas/LocalizedString'
+                            allOf:
+                                -   description: >-
+                                        Human-readable name of the timetable the changed event belongs to. See
+                                        [LocalizedString](#section/Localization).
+                                -   $ref: '#/components/schemas/LocalizedString'
                 viewTimetableUrl:
                     format: url
                     description: URL where the user can view their timetable.
@@ -424,13 +475,18 @@ components:
             type: object
             properties:
                 start:
-                    $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
+                    allOf:
+                        -   description: Start of the event.
+                            nullable: true
+                        -   $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
                 end:
-                    $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
+                    allOf:
+                        -   description: End of the event.
+                            nullable: true
+                        -   $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
                 multiDay:
                     description: True if the timetabled event spans multiple days.
                     type: boolean
-            nullable: true
             example:
                 start:
                     dateTime: '2019-04-23T08:45+01:00'
