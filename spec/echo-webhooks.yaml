@@ -23,10 +23,10 @@ info:
         ### Receiving data
 
 
-        Echo will make a HTTP `POST` request to the configured webhook URL. All requests will be sent with
-        content type `application/json` and will contain an `event` message with a `data` property that is
-        specific to the type of event. Please refer to the [Webhook call](#operation/WebhookCall) POST
-        endpoint for details on the exact contents of the request body and headers.
+        Echo makes a HTTP `POST` request to the configured webhook URL. All requests are sent with content
+        type `application/json` and contain an `event` message with a `data` property that is specific to the
+        type of event. Please refer to the [Webhook call](#operation/WebhookCall) POST endpoint for details
+        on the exact contents of the request body and headers.
 
 
         *At least once* delivery is used. This means that events might be delivered multiple times, for
@@ -45,13 +45,13 @@ info:
         should return an empty body with your response.
 
 
-        Any other HTTP status codes indicates that you did not receive the webhook and will be considered an
-        error response. This includes HTTP `3xx` redirection codes, these will not be followed by Echo.
-        Endpoints must never send a response larger that `32KB`.
+        Any other HTTP status codes indicates that you did not receive the webhook and are considered an
+        error response. This includes HTTP `3xx` redirection codes, these are not followed by Echo. Endpoints
+        must never send a response larger that `32KB`.
 
 
         Receiving endpoints must respond to Echo within 10 seconds. If no response is received within 10
-        seconds, this will be considered an error response.
+        seconds, this is considered an error response.
 
 
         It is best practice to acknowledge webhook requests immediately, and defer processing of the request
@@ -61,14 +61,14 @@ info:
         ### Error handling
 
 
-        If a request to the receiving endpoints fails, Echo will start a retry process. As a result of this,
+        If a request to the receiving endpoints fails, Echo starts a retry process. As a result of this,
         events might be delivered multiple times (for example when an endpoint _did_ receive a message, but
         _did not_ respond within 10 seconds). Endpoints can use the `X-Echo-Delivery-Id` HTTP header to
         deduplicate events.
 
 
         Echo might drop events if a certain delivery queue size threshold is exceeded due to retries. The
-        oldest events will be dropped first. When endpoints are down for an extended period of time, they
+        oldest events is dropped first. When endpoints are down for an extended period of time, they
         might be automatically disabled.
 
 
@@ -128,8 +128,9 @@ paths:
             tags:
                 - Calls
             summary: Webhook call
-            description: |-
+            description: >-
                 Use webhooks to be notified about events that happen in Echo.
+
 
                 Echo can send webhook events that notify your application any time an event happens.
             operationId: WebhookCall
@@ -181,13 +182,11 @@ paths:
 components:
     schemas:
         Event:
-            title: Event
-            description: An event triggered
             type: object
             properties:
                 id:
                     format: uuid
-                    description: Unique identifier for the event.
+                    description: Unique identifier of the event.
                     type: string
                     example: f9d421d5-63e3-4724-8a21-d7d81d81417a
                 type:
@@ -211,10 +210,11 @@ components:
                 -   type: object
                     properties:
                         data:
-                            description: Ping response. Always returns `true`.
+                            description: Ping response data object.
                             type: object
                             properties:
                                 ping:
+                                    description: Always returns `true`.
                                     type: boolean
                                     example: true
         LocalizedString:
@@ -223,7 +223,8 @@ components:
             properties:
                 '@type':
                     description: >-
-                        Type of this object, which is always `"localized_string"`. Can be used as a hint while parsing.
+                        Type of this object, which is always `localized_string`. Can be used as a hint while
+                        parsing.
                     type: string
                     example: localized_string
                 defaultValue:
@@ -231,10 +232,10 @@ components:
                     type: string
                 localizedValues:
                     description: >-
-                        Object containing representations for additional locales. The representation for the default
-                        locale is not included, so this map can be empty. Attribute names are
-                        [BCP47](https://tools.ietf.org/html/bcp47) language tags and their values are the actual
-                        representations.
+                        Object containing representations for additional locales. The representation for the
+                        default locale is not included, so this map can be empty. Attribute names are
+                        [BCP47](https://tools.ietf.org/html/bcp47) language tags and their values are the
+                        actual representations.
                     type: object
                     additionalProperties:
                         type: string
@@ -245,26 +246,12 @@ components:
                     en-US: This is a localized message.
                     nl: Dit is een gelokaliseerd bericht.
         Notification:
-            title: Notification
             description: >-
-                Represents a notification that can be sent to a user.
+                Represents a notification sent to a user.
 
 
-                A notification is targeted to one user. The priority of a notification can be one of the
-                following:
-
-
-                - `LOW`
-
-                - `DEFAULT`
-
-                - `HIGH`
-
-
-                A notification contains a payload that depends on the type of notification sent. The
-                notification type can be one of the following:
-
-                - `timetable_change`
+                A notification contains a payload that depends on the type of notification sent. See
+                [Well-known Notification Types](#tag/WellKnownNotificationTypes).
             type: object
             properties:
                 id:
@@ -285,17 +272,18 @@ components:
                     description: >-
                         Time at which the notification was created.
 
-                        A date-time represented as a string in ISO8601 combined date and time format
-                        (including timezone). Format used: `YYYY-MM-DDThh:mm:ss.sss±hh:mm`.
+
+                        ISO8601 formatted date-time string including timezone offset
+                        (`YYYY-MM-DDThh:mm±hh:mm`).
                     type: string
                     example: '2019-04-23T08:45:23.000+01:00'
                 type:
                     description: Type of the notification.
                     type: string
                 user:
-                    description: Targeted user for the notification.
+                    description: Target user for the notification.
                     type: string
-                    example: john.doe@example.org
+                    example: john.doe
                 payload:
                     description: The payload of the notification.
                     type: object
@@ -374,7 +362,7 @@ components:
                         name:
                             $ref: '#/components/schemas/LocalizedString'
                 viewTimetableUrl:
-                    format: uri
+                    format: url
                     description: URL where the user can view their timetable.
                     type: string
                     example: 'https://mytimetable.example.org'
@@ -433,12 +421,6 @@ components:
                             nl: John Doe (23452)
                 viewTimetableUrl: 'https://mytimetable.example.org'
         Notification.Payload_TimetableChange.Schedule:
-            title: Schedule
-            description: |-
-                A schedule of a timetabled event.
-
-                `start` and `end` both return either `dateTime` (for regular events) or `date` (for all-day events).
-                `end` is inclusive in case of all-day events, exclusive otherwise.
             type: object
             properties:
                 start:
@@ -456,45 +438,39 @@ components:
                     dateTime: '2019-04-23T09:45+01:00'
                 multiDay: false
         Notification.Payload_TimetableChange.Schedule.Date:
-            title: Schedule date
-            description: >-
-                Represents a date in a schedule.
-
-
-                Either `date` or `dateTime` is set.  When `dateTime` is returned, `date` is set to null, and
-                vice versa.
-
-
-                `date` is used if this is an all-day event, otherwise `dateTime` is used.
             type: object
             properties:
                 date:
                     format: date
-                    description: 'A date represented as a string in ISO8601 date format. Format used: `YYYY-MM-DD`.'
+                    description: >-
+                        ISO8601 formatted date string (`YYYY-MM-DD`). Null when the event is *not* an all-day
+                        event.
                     type: string
                     nullable: true
                     example: '2019-04-23'
                 dateTime:
                     format: date-time
                     description: >-
-                        A date-time represented as a string in ISO8601 combined date and time format
-                        (including timezone). Format used: `YYYY-MM-DDThh:mm±hh:mm`.
+                        ISO8601 formatted date-time string including timezone offset
+                        (`YYYY-MM-DDThh:mm±hh:mm`). Null when the event is an all-day event.
                     type: string
                     nullable: true
                     example: '2019-04-23T08:45+02:00'
         NotificationBatch:
-            title: Notification batch
             description: A batch of notifications.
             type: object
             properties:
                 type:
                     description: >-
-                        The type of notifications in this batch. All notifications in this batch have this type.
+                        The type of the notifications in this batch. All notifications in a batch have the
+                        same type.
                     type: string
                 user:
-                    description: Targeted user for the notification.
+                    description: >-
+                        Target user of the notifications in this batch. All notifications in a batch have the
+                        same target user.
                     type: string
-                    example: john.doe@example.org
+                    example: john.doe
                 notifications:
                     description: The notifications in this batch.
                     type: array
@@ -503,15 +479,17 @@ components:
     securitySchemes:
         http_basic_auth:
             type: http
-            description: |-
+            description: >-
                 Basic HTTP Authentication.
+
 
                 As per [RFC 7617](https://tools.ietf.org/html/rfc7617).
             scheme: basic
         http_bearer:
             type: http
-            description: |-
+            description: >-
                 Authentication using Bearer tokens.
+
 
                 As per [RFC 6750](https://tools.ietf.org/html/rfc6750).
             scheme: bearer
