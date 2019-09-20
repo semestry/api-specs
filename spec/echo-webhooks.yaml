@@ -378,6 +378,60 @@ components:
                     description: URL where the user can view their timetable.
                     type: string
                     example: 'https://mytimetable.example.org'
+            example:
+                event:
+                    id: 2019!9347347
+                    created: false
+                    updated: true
+                    removed: false
+                    scheduleUpdated: true
+                    name:
+                        '@type': localized_string
+                        defaultValue: M-1423 - Linear algebra 101
+                        localizedValues:
+                            en-US: M-1423 - Linear algebra 101
+                            nl: M-1423 - Lineaire algebra 101
+                    oldSchedule:
+                        start:
+                            dateTime: '2019-04-23T08:45+01:00'
+                        end:
+                            dateTime: '2019-04-23T09:45+01:00'
+                        multiDay: false
+                    newSchedule:
+                        start:
+                            date: '2019-04-23'
+                        end:
+                            date: '2019-04-25'
+                        multiDay: true
+                    attributes:
+                        -   name: location
+                            label:
+                                '@type': localized_string
+                                defaultValue: Room(s)
+                                localizedValues:
+                                    en-US: Room(s)
+                                    nl: Ruimte(s)
+                            new:
+                                '@type': localized_string
+                                defaultValue: C1.241
+                                localizedValues:
+                                    en-US: C1.241
+                                    nl: C1.241
+                            old:
+                                '@type': localized_string
+                                defaultValue: C2.021
+                                localizedValues:
+                                    en-US: C2.021
+                                    nl: C2.021
+                timetable:
+                    id: 2019!student!23452
+                    name:
+                        '@type': localized_string
+                        defaultValue: John Doe (23452)
+                        localizedValues:
+                            en-US: John Doe (23452)
+                            nl: John Doe (23452)
+                viewTimetableUrl: 'https://mytimetable.example.org'
         Notification.Payload_TimetableChange.Schedule:
             title: Schedule
             description: |-
@@ -470,108 +524,6 @@ tags:
             - `ping`
 
             ### Example request bodies
-
-            #### notification_batch.created
-
-            ````json
-            {
-                "id": "f9d421d5-63e3-4724-8a21-d7d81d81417a",
-                "type": "notification_batch.created",
-                "data": {
-                    "type": "timetable_change",
-                    "user": "john.doe@example.org",
-                    "notifications": [
-                        {
-                            "id": "ef67d9ac-f97c-4a76-b914-8104aa537c0e",
-                            "priority": "HIGH",
-                            "timestamp": "2019-04-23T08:45:23.000+01:00",
-                            "type": "timetable_change",
-                            "user": "john.doe@example.org",
-                            "payload": {
-                                "event": {
-                                    "id": "2019!9347347",
-                                    "created": false,
-                                    "updated": true,
-                                    "removed": false,
-                                    "scheduleUpdated": true,
-                                    "name": {
-                                        "@type": "localized_string",
-                                        "defaultValue": "M-1423 - Linear algebra 101",
-                                        "localizedValues": {
-                                          "en-US": "M-1423 - Linear algebra 101",
-                                          "nl": "M-1423 - Lineaire algebra 101."
-                                        }
-                                    },
-                                    "oldSchedule": {
-                                        "start": {
-                                            "dateTime": "2019-04-23T08:45+01:00",
-                                            "date": null
-                                        },
-                                        "end": {
-                                            "dateTime": "2019-04-23T09:45+01:00",
-                                            "date": null
-                                        },
-                                        "multiDay": false
-                                    },
-                                    "newSchedule": {
-                                        "start": {
-                                            "dateTime": null,
-                                            "date": "2019-04-23"
-                                        },
-                                        "end": {
-                                            "dateTime": null,
-                                            "date": "2019-04-25"
-                                        },
-                                        "multiDay": true
-                                    },
-                                    "attributes": [
-                                        {
-                                            "name": "location",
-                                            "label": {
-                                                "@type": "localized_string",
-                                                "defaultValue": "Room(s)",
-                                                "localizedValues": {
-                                                  "en-US": "Room(s)",
-                                                  "nl": "Ruimte(s)"
-                                                }
-                                            },
-                                            "new": {
-                                                "@type": "localized_string",
-                                                "defaultValue": "C1.241",
-                                                "localizedValues": {
-                                                  "en-US": "C1.241",
-                                                  "nl": "C1.241"
-                                                }
-                                            },
-                                            "old": {
-                                                "@type": "localized_string",
-                                                "defaultValue": "C2.021",
-                                                "localizedValues": {
-                                                  "en-US": "C2.021",
-                                                  "nl": "C2.021"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                },
-                                "timetable": {
-                                    "id": "2019!student!23452",
-                                    "name": {
-                                        "@type": "localized_string",
-                                        "defaultValue": "John Doe (23452)",
-                                        "localizedValues": {
-                                          "en-US": "John Doe (23452)",
-                                          "nl": "John Doe (23452)"
-                                        }
-                                    }
-                                },
-                                "viewTimetableUrl": "https://mytimetable.example.org"
-                            }
-                        }
-                    ]
-                }
-            }
-            ````
 
             #### ping
 
