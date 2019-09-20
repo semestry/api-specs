@@ -436,7 +436,7 @@ components:
                     type: object
                     example:
                         ...: See 'Notification types' for example payloads per notification type.
-        notification_timetable_change:
+        Notification.Payload_TimetableChange:
             title: timetable_change
             type: object
             properties:
@@ -665,5 +665,5 @@ tags:
 
             ### payload
 
-            <SchemaDefinition schemaRef="#/components/schemas/notification_timetable_change" />
+            <SchemaDefinition schemaRef="#/components/schemas/Notification.Payload_TimetableChange" />
         x-displayName: Well-known Notification Types
