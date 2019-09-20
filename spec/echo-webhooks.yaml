@@ -187,7 +187,7 @@ components:
                     properties:
                         data:
                             $ref: '#/components/schemas/NotificationBatch'
-        schedule_date:
+        Notification.Payload_TimetableChange.Schedule.Date:
             title: Schedule date
             description: >-
                 Represents a date in a schedule.
@@ -239,9 +239,9 @@ components:
             type: object
             properties:
                 start:
-                    $ref: '#/components/schemas/schedule_date'
+                    $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
                 end:
-                    $ref: '#/components/schemas/schedule_date'
+                    $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
                 multiDay:
                     description: True if the timetabled event spans multiple days.
                     type: boolean
