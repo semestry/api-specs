@@ -180,81 +180,6 @@ paths:
                 -   http_bearer: []
 components:
     schemas:
-        Event_NotificationBatchCreated:
-            allOf:
-                -   $ref: '#/components/schemas/Event'
-                -   type: object
-                    properties:
-                        data:
-                            $ref: '#/components/schemas/NotificationBatch'
-        Notification.Payload_TimetableChange.Schedule.Date:
-            title: Schedule date
-            description: >-
-                Represents a date in a schedule.
-
-
-                Either `date` or `dateTime` is set.  When `dateTime` is returned, `date` is set to null, and
-                vice versa.
-
-
-                `date` is used if this is an all-day event, otherwise `dateTime` is used.
-            type: object
-            properties:
-                date:
-                    format: date
-                    description: 'A date represented as a string in ISO8601 date format. Format used: `YYYY-MM-DD`.'
-                    type: string
-                    nullable: true
-                    example: '2019-04-23'
-                dateTime:
-                    format: date-time
-                    description: >-
-                        A date-time represented as a string in ISO8601 combined date and time format
-                        (including timezone). Format used: `YYYY-MM-DDThh:mm±hh:mm`.
-                    type: string
-                    nullable: true
-                    example: '2019-04-23T08:45+02:00'
-        Notification.Payload_TimetableChange.Schedule:
-            title: Schedule
-            description: |-
-                A schedule of a timetabled event.
-
-                `start` and `end` both return either `dateTime` (for regular events) or `date` (for all-day events).
-                `end` is inclusive in case of all-day events, exclusive otherwise.
-            type: object
-            properties:
-                start:
-                    $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
-                end:
-                    $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
-                multiDay:
-                    description: True if the timetabled event spans multiple days.
-                    type: boolean
-            nullable: true
-            example:
-                start:
-                    dateTime: '2019-04-23T08:45+01:00'
-                end:
-                    dateTime: '2019-04-23T09:45+01:00'
-                multiDay: false
-        NotificationBatch:
-            title: Notification batch
-            description: A batch of notifications.
-            type: object
-            properties:
-                type:
-                    description: >-
-                        The type of notifications in this batch. All notifications in this batch have this type.
-                    type: string
-                user:
-                    description: Targeted user for the notification.
-                    type: string
-                    example: john.doe@example.org
-                notifications:
-                    description: The notifications in this batch.
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/Notification'
         Event:
             title: Event
             description: An event triggered
@@ -273,6 +198,13 @@ components:
                 mapping:
                     notification_batch.created: '#/components/schemas/Event_NotificationBatchCreated'
                     ping: '#/components/schemas/Event_Ping'
+        Event_NotificationBatchCreated:
+            allOf:
+                -   $ref: '#/components/schemas/Event'
+                -   type: object
+                    properties:
+                        data:
+                            $ref: '#/components/schemas/NotificationBatch'
         Event_Ping:
             allOf:
                 -   $ref: '#/components/schemas/Event'
@@ -285,6 +217,33 @@ components:
                                 ping:
                                     type: boolean
                                     example: true
+        LocalizedString:
+            description: String with representations in multiple locales.
+            type: object
+            properties:
+                '@type':
+                    description: >-
+                        Type of this object, which is always `"localized_string"`. Can be used as a hint while parsing.
+                    type: string
+                    example: localized_string
+                defaultValue:
+                    description: Representation for the default locale.
+                    type: string
+                localizedValues:
+                    description: >-
+                        Object containing representations for additional locales. The representation for the default
+                        locale is not included, so this map can be empty. Attribute names are
+                        [BCP47](https://tools.ietf.org/html/bcp47) language tags and their values are the actual
+                        representations.
+                    type: object
+                    additionalProperties:
+                        type: string
+            example:
+                '@type': localized_string
+                defaultValue: This is a localised message.
+                localizedValues:
+                    en-US: This is a localized message.
+                    nl: Dit is een gelokaliseerd bericht.
         Notification:
             title: Notification
             description: >-
@@ -419,33 +378,74 @@ components:
                     description: URL where the user can view their timetable.
                     type: string
                     example: 'https://mytimetable.example.org'
-        LocalizedString:
-            description: String with representations in multiple locales.
+        Notification.Payload_TimetableChange.Schedule:
+            title: Schedule
+            description: |-
+                A schedule of a timetabled event.
+
+                `start` and `end` both return either `dateTime` (for regular events) or `date` (for all-day events).
+                `end` is inclusive in case of all-day events, exclusive otherwise.
             type: object
             properties:
-                '@type':
-                    description: >-
-                        Type of this object, which is always `"localized_string"`. Can be used as a hint while parsing.
-                    type: string
-                    example: localized_string
-                defaultValue:
-                    description: Representation for the default locale.
-                    type: string
-                localizedValues:
-                    description: >-
-                        Object containing representations for additional locales. The representation for the default
-                        locale is not included, so this map can be empty. Attribute names are
-                        [BCP47](https://tools.ietf.org/html/bcp47) language tags and their values are the actual
-                        representations.
-                    type: object
-                    additionalProperties:
-                        type: string
+                start:
+                    $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
+                end:
+                    $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
+                multiDay:
+                    description: True if the timetabled event spans multiple days.
+                    type: boolean
+            nullable: true
             example:
-                '@type': localized_string
-                defaultValue: This is a localised message.
-                localizedValues:
-                    en-US: This is a localized message.
-                    nl: Dit is een gelokaliseerd bericht.
+                start:
+                    dateTime: '2019-04-23T08:45+01:00'
+                end:
+                    dateTime: '2019-04-23T09:45+01:00'
+                multiDay: false
+        Notification.Payload_TimetableChange.Schedule.Date:
+            title: Schedule date
+            description: >-
+                Represents a date in a schedule.
+
+
+                Either `date` or `dateTime` is set.  When `dateTime` is returned, `date` is set to null, and
+                vice versa.
+
+
+                `date` is used if this is an all-day event, otherwise `dateTime` is used.
+            type: object
+            properties:
+                date:
+                    format: date
+                    description: 'A date represented as a string in ISO8601 date format. Format used: `YYYY-MM-DD`.'
+                    type: string
+                    nullable: true
+                    example: '2019-04-23'
+                dateTime:
+                    format: date-time
+                    description: >-
+                        A date-time represented as a string in ISO8601 combined date and time format
+                        (including timezone). Format used: `YYYY-MM-DDThh:mm±hh:mm`.
+                    type: string
+                    nullable: true
+                    example: '2019-04-23T08:45+02:00'
+        NotificationBatch:
+            title: Notification batch
+            description: A batch of notifications.
+            type: object
+            properties:
+                type:
+                    description: >-
+                        The type of notifications in this batch. All notifications in this batch have this type.
+                    type: string
+                user:
+                    description: Targeted user for the notification.
+                    type: string
+                    example: john.doe@example.org
+                notifications:
+                    description: The notifications in this batch.
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Notification'
     securitySchemes:
         http_basic_auth:
             type: http
