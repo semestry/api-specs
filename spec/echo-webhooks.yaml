@@ -162,20 +162,20 @@ paths:
             responses:
                 '200':
                     description: >-
-                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it received
-                        the request.
+                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it has
+                        received the request.
                 '201':
                     description: >-
-                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it received
-                        the request.
+                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it has
+                        received the request.
                 '202':
                     description: >-
-                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it received
-                        the request.
+                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it has
+                        received the request.
                 '204':
                     description: >-
-                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it received
-                        the request.
+                        Receiving endpoints must return a `2xx` HTTP response code to acknowledge it has
+                        received the request.
             security:
                 -   http_basic_auth: []
                 -   http_bearer: []
@@ -495,25 +495,27 @@ components:
             scheme: bearer
 tags:
     -   name: Events
-        description: |-
-            The following event types are supported:
+        description: >-
+            Events are used to communicate when something interesting happens in Echo. For example, when a
+            batch of notifications is created, an `Event` with the type `notification_batch.created` is
+            created.
 
-            - `notification_batch.created`
-            - `ping`
+            ### Event types
 
-            ### Example request bodies
+            These are the event types that currently exist:
 
-            #### ping
 
-            ````json
-            {
-                "id": "f9d421d5-63e3-4724-8a21-d7d81d81417a",
-                "type": "ping",
-                "data": {
-                    "ping": true
-                }
-            }
-            ````
+            | type                         | description                                                 |
+
+            |------------------------------|-------------------------------------------------------------|
+
+            | `notification_batch.created` | Event indicating one or more changes to a user's timetable. |
+
+            | `ping`                       | _Currently unused._                                         |
+
+
+            We may add more event types at any time, so in developing and maintaining your code, you should
+            not assume that only these types exist.
     -   name: WellKnownNotificationTypes
         description: >-
             Notification types are dynamic, so it would be impossible to list them here.
