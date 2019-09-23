@@ -1,0 +1,547 @@
+openapi: 3.0.2
+info:
+    title: Echo
+    version: 1.0.0
+    description: >-
+        # Introduction
+
+        This API specification describes the functionality of the Echo REST API.
+
+
+        Please refer to the [Echo Webhook API documentation](https://api-docs.mytimetable.net/echo-webhooks)
+        for more information on the webhook system.
+
+
+        # Authentication
+
+        The current Echo API only supports basic authentication. Make sure to keep your authentication details
+        secure. Do not share your authentication details in publicly accessible areas such as GitHub,
+        client-side code, and so forth.
+
+
+        All API requests must be made over HTTPS. Calls made over plain HTTP will fail. API requests without
+        authentication will also fail.
+
+
+        <security-definitions />
+
+
+        # Errors
+
+        HTTP response codes are used to indicate the success or failure of an API request. The following
+        response codes can be expected:
+
+        - 2xx codes indicate success
+
+        - 4xx codes indicate client errors (e.g., a required parameter is missing, the requested object does
+        not exist, etc.)
+
+        - 5xx codes indicate server errors on the Echo side
+
+
+        General response codes, such as `401 Unauthorized` are not documented per call. The following general
+        response codes can be returned by the API:
+
+
+        - 401 Unauthorized
+
+        - 403 Forbidden
+
+        - 405 Method Not Allowed
+
+        - 406 Not Acceptable
+
+        - 415 Unsupported Media Type
+
+
+        If any response code have a specific meaning for a certain call, they are documented as such with the
+        call.
+
+
+        # Localization
+
+        Echo is currently unaware of the user's preferred locale. So when one wants to localize messages
+        presented to the user, let's say render notifications in an app, this localization needs to happen in
+        the app.
+
+        For this reason, API responses can include human-readable strings in multiple locales.
+
+        These are organised in the following `LocalizedString` object structure as documented below.
+
+        The API user can then select the representation in the desired locale.
+
+        It should check whether a locale-specific representation is available and fall back to the default
+        representation if unavailable.
+
+
+        This also means this datatype can be used in notification payloads when posting notifications to Echo.
+        Currently, when Echo renders notifications (for example, when sending email notifications) it will
+        use the representation for the default locale.
+
+        ### LocalizedString
+
+        String with representations in multiple locales.
+
+        <SchemaDefinition schemaRef="#/components/schemas/LocalizedString" />
+    contact:
+        name: API Support
+        url: 'https://eveoh.nl'
+        email: support@eveoh.nl
+servers:
+    -   url: 'https://{hostname}:{port}/api/v0'
+        description: The base URL of the Echo v0 API.
+        variables:
+            hostname:
+                default: echo.example.org
+            port:
+                default: '8082'
+paths:
+    '/events/{id}':
+        get:
+            tags:
+                - Events
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Event'
+                    description: OK. Successful response.
+                '404':
+                    description: >-
+                        Not Found. The requested Event does not exist or the client is not authorized to
+                        retrieve the Event.
+            operationId: GetEvent
+            summary: Retrieve an Event
+            description: >-
+                Retrieves the details of an event. Provide the unique identifier of the event, which you might
+                have received in a webhook.
+        parameters:
+            -   name: id
+                description: Unique identifier of the event.
+                schema:
+                    format: uuid
+                    type: string
+                in: path
+                required: true
+components:
+    schemas:
+        Event:
+            type: object
+            properties:
+                id:
+                    format: uuid
+                    description: Unique identifier of the event.
+                    type: string
+                    example: f9d421d5-63e3-4724-8a21-d7d81d81417a
+                type:
+                    description: >-
+                        Type of the event. See [Events](#tag/Events) for a description of
+                        all types.
+                    type: string
+            discriminator:
+                propertyName: type
+                mapping:
+                    notification_batch.created: '#/components/schemas/Event_NotificationBatchCreated'
+                    ping: '#/components/schemas/Event_Ping'
+        Event_NotificationBatchCreated:
+            allOf:
+                -   $ref: '#/components/schemas/Event'
+                -   type: object
+                    properties:
+                        data:
+                            $ref: '#/components/schemas/NotificationBatch'
+        Event_Ping:
+            allOf:
+                -   $ref: '#/components/schemas/Event'
+                -   type: object
+                    properties:
+                        data:
+                            description: Ping response data object.
+                            type: object
+                            properties:
+                                ping:
+                                    description: Always returns `true`.
+                                    type: boolean
+                                    example: true
+        LocalizedString:
+            description: String with representations in multiple locales.
+            type: object
+            properties:
+                '@type':
+                    description: >-
+                        Type of this object, which will always be `"localized_string"`. Can be used as a hint
+                        while parsing.
+                    type: string
+                    example: localized_string
+                defaultValue:
+                    description: Representation for the default locale.
+                    type: string
+                localizedValues:
+                    description: >-
+                        Object containing representations for additional locales. The representation for the
+                        default locale is not included, so this map can be empty. Attribute names are
+                        [BCP47](https://tools.ietf.org/html/bcp47) language tags and their values are the
+                        actual representations.
+                    type: object
+                    additionalProperties:
+                        type: string
+            example:
+                '@type': localized_string
+                defaultValue: This is a localised message.
+                localizedValues:
+                    en-US: This is a localized message.
+                    nl: Dit is een gelokaliseerd bericht.
+        Notification:
+            description: >-
+                Represents a notification sent to a user.
+
+
+                A notification contains a payload that depends on the type of notification sent. See
+                [Well-known Notification Types](#tag/WellKnownNotificationTypes).
+            type: object
+            properties:
+                id:
+                    format: uuid
+                    description: Unique identifier of the notification.
+                    type: string
+                    example: ef67d9ac-f97c-4a76-b914-8104aa537c0e
+                priority:
+                    description: Priority of the notification.
+                    enum:
+                        - LOW
+                        - DEFAULT
+                        - HIGH
+                    type: string
+                    example: DEFAULT
+                timestamp:
+                    format: date-time
+                    description: >-
+                        Time at which the notification was created.
+
+
+                        ISO 8601 formatted date-time string including timezone offset
+                        (`YYYY-MM-DDThh:mm±hh:mm`).
+                    type: string
+                    example: '2019-04-23T08:45:23.000+01:00'
+                type:
+                    description: Type of the notification.
+                    type: string
+                user:
+                    description: Target user for the notification.
+                    type: string
+                    example: john.doe
+                payload:
+                    description: The payload of the notification.
+                    type: object
+                    example:
+                        ...: See 'Notification types' for example payloads per notification type.
+        Notification.Payload_TimetableChange:
+            title: timetable_change
+            type: object
+            properties:
+                event:
+                    description: A changed event in the target user's timetable.
+                    type: object
+                    properties:
+                        id:
+                            description: The ID of the event that has been changed.
+                            type: string
+                            example: 2019!9347347
+                        created:
+                            description: >-
+                                `true` if the event has been added to the timetable. Mutually exclusive with
+                                `updated` and `removed`.
+
+
+                                `newSchedule` will contain the schedule of the newly created event.
+                                `attributes` will contain all attributes. Since there are no old attribute
+                                values, these will all be `null`.
+                            type: boolean
+                            example: false
+                        updated:
+                            description: >-
+                                `true` if the event already was and remains in the timetable. Mutually
+                                exclusive with `updated` and `removed`.
+
+
+                                `oldSchedule` will contain the schedule of the event before the update,
+                                `newSchedule` will contain the schedule of the event after the update.
+                                `oldSchedule` and `newSchedule` will be equal if the schedule is not updated.
+                                `attributes` will only contain changed attributes. Old or new values can be
+                                `null` when an attribute was added or removed.
+                            type: boolean
+                            example: false
+                        removed:
+                            description: >-
+                                `true` if the event has been removed from the timetable. Mutually exclusive
+                                with `updated` and `removed`.
+
+
+                                `oldSchedule` will contain the schedule of the event before removal.
+                                `attributes` will be empty. In a future implementation, `attributes` might
+                                include the old values.
+                            type: boolean
+                            example: false
+                        scheduleUpdated:
+                            description: >-
+                                `true` if the event has been `created`, `removed` or rescheduled (the start
+                                and/or end of the event has changed).
+
+
+                                `oldSchedule` will contain the schedule of the event before removal or
+                                rescheduling. `newSchedule` will contain the schedule of the event after
+                                creation or rescheduling.
+                            type: boolean
+                            example: false
+                        name:
+                            allOf:
+                                -   description: >-
+                                        Human-readable name of the event. See
+                                        [LocalizedString](#section/Localization).
+                                -   $ref: '#/components/schemas/LocalizedString'
+                        oldSchedule:
+                            allOf:
+                                -   description: >-
+                                        The schedule of the event before it was changed.
+                                    nullable: true
+                                -   $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule'
+                        newSchedule:
+                            allOf:
+                                -   description: >-
+                                        The schedule of the event after it was changed.
+                                    nullable: true
+                                -   $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule'
+                        attributes:
+                            description: An array of changed attributes for this event.
+                            type: array
+                            items:
+                                description: >-
+                                    Represents a change in an attribute of an event. For example, this could
+                                    contain a location attribute when the event has been moved to another
+                                    location.
+                                type: object
+                                properties:
+                                    name:
+                                        description: Machine-readable name of the attribute.
+                                        type: string
+                                        example: location
+                                    label:
+                                        allOf:
+                                            -   description: >-
+                                                    Human-readable name of the attribute. See
+                                                    [LocalizedString](#section/Localization).
+                                            -   $ref: '#/components/schemas/LocalizedString'
+                                    new:
+                                        allOf:
+                                            -   description: >-
+                                                    The value of the attribute after the change. See
+                                                    [LocalizedString](#section/Localization).
+                                                nullable: true
+                                            -   $ref: '#/components/schemas/LocalizedString'
+                                    old:
+                                        allOf:
+                                            -   description: >-
+                                                    The value of the attribute before the change. See
+                                                    [LocalizedString](#section/Localization).
+                                                nullable: true
+                                            -   $ref: '#/components/schemas/LocalizedString'
+                timetable:
+                    description: Timetable the changed event belongs to.
+                    type: object
+                    properties:
+                        id:
+                            description: ID of the timetable the changed event belongs to.
+                            type: string
+                            example: 2019!student!23452
+                        name:
+                            allOf:
+                                -   description: >-
+                                        Human-readable name of the timetable the changed event belongs to. See
+                                        [LocalizedString](#section/Localization).
+                                -   $ref: '#/components/schemas/LocalizedString'
+                viewTimetableUrl:
+                    format: url
+                    description: URL where the user can view their timetable.
+                    type: string
+                    example: 'https://mytimetable.example.org'
+            example:
+                event:
+                    id: 2019!9347347
+                    created: false
+                    updated: true
+                    removed: false
+                    scheduleUpdated: true
+                    name:
+                        '@type': localized_string
+                        defaultValue: M-1423 - Linear algebra 101
+                        localizedValues:
+                            en-US: M-1423 - Linear algebra 101
+                            nl: M-1423 - Lineaire algebra 101
+                    oldSchedule:
+                        start:
+                            dateTime: '2019-04-23T08:45+01:00'
+                        end:
+                            dateTime: '2019-04-23T09:45+01:00'
+                        multiDay: false
+                    newSchedule:
+                        start:
+                            date: '2019-04-23'
+                        end:
+                            date: '2019-04-25'
+                        multiDay: true
+                    attributes:
+                        -   name: location
+                            label:
+                                '@type': localized_string
+                                defaultValue: Room(s)
+                                localizedValues:
+                                    en-US: Room(s)
+                                    nl: Ruimte(s)
+                            new:
+                                '@type': localized_string
+                                defaultValue: C1.241
+                                localizedValues:
+                                    en-US: C1.241
+                                    nl: C1.241
+                            old:
+                                '@type': localized_string
+                                defaultValue: C2.021
+                                localizedValues:
+                                    en-US: C2.021
+                                    nl: C2.021
+                timetable:
+                    id: 2019!student!23452
+                    name:
+                        '@type': localized_string
+                        defaultValue: John Doe (23452)
+                        localizedValues:
+                            en-US: John Doe (23452)
+                            nl: John Doe (23452)
+                viewTimetableUrl: 'https://mytimetable.example.org'
+        Notification.Payload_TimetableChange.Schedule:
+            type: object
+            properties:
+                start:
+                    allOf:
+                        -   description: Start of the event.
+                            nullable: true
+                        -   $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
+                end:
+                    allOf:
+                        -   description: End of the event.
+                            nullable: true
+                        -   $ref: '#/components/schemas/Notification.Payload_TimetableChange.Schedule.Date'
+                multiDay:
+                    description: True if the timetabled event spans multiple days.
+                    type: boolean
+            example:
+                start:
+                    dateTime: '2019-04-23T08:45+01:00'
+                end:
+                    dateTime: '2019-04-23T09:45+01:00'
+                multiDay: false
+        Notification.Payload_TimetableChange.Schedule.Date:
+            type: object
+            properties:
+                date:
+                    format: date
+                    description: >-
+                        ISO 8601 formatted date string (`YYYY-MM-DD`). Null when the event is *not* an all-day
+                        event.
+                    type: string
+                    nullable: true
+                    example: '2019-04-23'
+                dateTime:
+                    format: date-time
+                    description: >-
+                        ISO 8601 formatted date-time string including timezone offset
+                        (`YYYY-MM-DDThh:mm±hh:mm`). Null when the event is an all-day event.
+                    type: string
+                    nullable: true
+                    example: '2019-04-23T08:45+02:00'
+        NotificationBatch:
+            description: A batch of notifications.
+            type: object
+            properties:
+                type:
+                    description: >-
+                        The type of the notifications in this batch. All notifications in a batch have the
+                        same type.
+                    type: string
+                user:
+                    description: >-
+                        Target user of the notifications in this batch. All notifications in a batch have the
+                        same target user.
+                    type: string
+                    example: john.doe
+                notifications:
+                    description: The notifications in this batch.
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Notification'
+    securitySchemes:
+        http_basic_auth:
+            scheme: basic
+            type: http
+            description: |-
+                Basic HTTP Authentication.
+
+                As per [RFC 7617](https://tools.ietf.org/html/rfc7617).
+security:
+    -   http_basic_auth: []
+tags:
+    -   name: Events
+        description: >-
+            Events are used to communicate when something interesting happens in Echo. For example, when a
+            batch of notifications is created, an `Event` with the type `"notification_batch.created"` is
+            created.
+
+
+            You can use an endpoint to retrieve an [individual event](#operation/GetEvent). We also have a
+            separate [webhooks system](https://api-docs.mytimetable.net/echo-webhooks) for sending the `Event`
+            objects to an endpoint on your server in a push-based manner.
+
+            ### Event types
+
+
+            These are the event types currently existing:
+
+
+            | type                         | description                                                 |
+
+            |------------------------------|-------------------------------------------------------------|
+
+            | `notification_batch.created` | Event indicating one or more changes to a user's timetable. |
+
+            | `ping`                       | _Currently unused._                                         |
+
+
+            We may add more event types at any time, so in developing and maintaining your code, you should
+            not assume that only these types exist.
+    -   name: WellKnownNotificationTypes
+        description: >-
+            Notification types are dynamic, so it would be impossible to list them here.
+
+            The contract is that sender and receiver should agree on the schema of the payload.
+
+            To facilitate this, we have defined some well-known notification types.
+
+
+            ## timetable_change
+
+            This type of notification indicates a change within the user's timetable.
+
+
+            One notification will be sent per changed timetable event in a specific timetable, so when
+            multiple events change, multiple notifications will be sent.
+
+            Also, when an event belongs to multiple timetables, multiple notifications will be sent.
+
+            These notifications may or may not be grouped together in a batch.
+
+
+            ### payload
+
+            <SchemaDefinition schemaRef="#/components/schemas/Notification.Payload_TimetableChange" />
+        x-displayName: Well-known Notification Types
