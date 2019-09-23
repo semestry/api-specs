@@ -169,7 +169,7 @@ info:
         name: API Support
         url: 'https://mytimetable.net'
         email: support@eveoh.nl
-    version: 1.0.2
+    version: 1.0.3
 servers:
     -   url: 'https://{baseUrl}'
         description: The URL of your server listening for Webhook calls.
