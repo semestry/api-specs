@@ -2,44 +2,42 @@ openapi: 3.0.2
 info:
     title: Echo Webhooks
     description: >
+        # Introduction
+
         This API specification describes the webhook functionality of the Echo API. Webhooks allow apps to
-        receive HTTP callbacks in real-time when events happen in Echo. The [Webhook
-        call](#operation/WebhookCall) POST endpoint describes the requests a receiving endpoint can expect.
+        receive HTTP callbacks in real-time when events happen in Echo.
 
 
-        ### Creating an endpoint for webhooks
+        Echo makes a HTTP `POST` request to a webhook URL. All requests are sent with content type
+        `application/json` and contain an `event` message (see [Events](#section/Events)).
 
+
+        Please refer to the [Webhook call](#operation/WebhookCall) POST endpoint
+        for details on the exact contents of the request body and headers.
+
+
+        # Endpoint requirements
 
         The receiving endpoint must:
 
 
         - be accessible via an HTTPS address with a valid SSL certificate
 
-        - be able to correctly process `event` requests
+        - be able to correctly process `event` requests (see [Webhook call](#operation/WebhookCall))
+
+        - respond to the request within 10 seconds
 
         - never send a response larger that `32KB`.
 
 
-        ### Receiving data
-
-
-        Echo makes a HTTP `POST` request to the configured webhook URL. All requests are sent with content
-        type `application/json` and contain an `event` message with a `data` property that is specific to the
-        type of event. Please refer to the [Webhook call](#operation/WebhookCall) POST endpoint for details
-        on the exact contents of the request body and headers.
-
+        ## Handling duplicate events
 
         *At least once* delivery is used. This means that events might be delivered multiple times, for
-        example as a result of [error handling](#error-handling). Endpoints can use the `X-Echo-Delivery-Id`
-        HTTP header to deduplicate events.
+        example as a result of [error handling](#section/Error-handling). Endpoints can use the
+        `X-Echo-Delivery-Id` HTTP header to deduplicate events.
 
 
-        Echo supports Basic Authentication and Bearer tokens via the `Authorization` HTTP header. It is up to
-        the receiving endpoint to validate the credentials.
-
-
-        ### Responding to a webhook
-
+        ## Responding to a callback
 
         Receiving endpoints must return a HTTP status code `2xx` to acknowledge it received the request. You
         should return an empty body with your response.
@@ -58,13 +56,12 @@ info:
         (i.e. making additional network calls, performing complex logic, et cetera).
 
 
-        ### Error handling
-
+        # Error handling
 
         If a request to the receiving endpoints fails, Echo starts a retry process. As a result of this,
         events might be delivered multiple times (for example when an endpoint _did_ receive a message, but
         _did not_ respond within 10 seconds). Endpoints can use the `X-Echo-Delivery-Id` HTTP header to
-        deduplicate events.
+        [deduplicate events](#section/Endpoint-requirements/Handling-duplicate-events).
 
 
         Echo might drop events if a certain delivery queue size threshold is exceeded due to retries. The
@@ -76,6 +73,7 @@ info:
         that are bound to a certain time (e.g. a scheduled activity from a timetable) that has already passed
         should not be forwarded to end-users.
 
+
         # Authentication
 
         Receiving endpoints can implement two types of authentication:
@@ -83,7 +81,10 @@ info:
           - Basic HTTP Authentication
           - Authentication using Bearer tokens
 
+        It is up to the receiving endpoint to validate the credentials.
+
         <security-definitions />
+
 
         # Localization
 
@@ -116,6 +117,12 @@ info:
         Events are used to communicate when something interesting happens in Echo. For example, when a batch
         of notifications is created, an `Event` with the type `notification_batch.created` is created.
 
+
+        ## The Event object
+
+        <SchemaDefinition schemaRef="#/components/schemas/Event" />
+
+
         ## Event types
 
         These are the event types that currently exist:
@@ -143,7 +150,6 @@ info:
 
 
         ## timetable_change
-
 
         This type of notification indicates a change within the user's timetable.
 
@@ -239,7 +245,9 @@ components:
                     type: string
                     example: f9d421d5-63e3-4724-8a21-d7d81d81417a
                 type:
-                    description: 'Type of the event. See [Events](#tag/Events) for a description of all types.'
+                    description: >-
+                        Type of the event. See [Events](#section/Events/Event-types) for a description of
+                        all types.
                     type: string
             discriminator:
                 propertyName: type
