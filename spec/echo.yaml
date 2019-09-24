@@ -139,6 +139,10 @@ components:
                         Type of the event. See [Events](#tag/Events) for a description of
                         all types.
                     type: string
+                source:
+                    description: Source of the event.
+                    type: string
+                    example: system
             discriminator:
                 propertyName: type
                 mapping:
