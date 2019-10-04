@@ -12,6 +12,7 @@
     "speccy": "0.9.0"
   },
   "scripts": {
+    "build": "rm -rf build && mkdir build && cp -r docs/* build && cp -r spec build",
     "lint": "npm-run-all --parallel lint:*",
     "lint:echo": "speccy lint spec/echo.yaml",
     "lint:echo-webhooks": "speccy lint spec/echo-webhooks.yaml",
