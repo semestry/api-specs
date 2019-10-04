@@ -5,7 +5,9 @@ This repository contains API specifications and generated documentation for Eveo
 ## Publishing
 
 The OpenAPI 3.0 specifications are generated using ReDoc. 
-Production API documentation pages are automatically published by Github Pages when changes are pushed to the `master` branch.
+Production API documentation pages are automatically built by a GitHub Workflow when changes are pushed to the `master` branch.
+The resulting build is pushed to the `gh-pages` branch. 
+The `gh-pages` branch in turn is automatically deployed by Github Pages.
 
 ## Development
 
