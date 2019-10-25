@@ -337,9 +337,18 @@ components:
                     description: Unique identifier for the event.
                     type: string
                     example: f9d421d5-63e3-4724-8a21-d7d81d81417a
+                timestamp:
+                    format: date-time
+                    description: Time at which the event was created.
+                    type: string
+                    example: '2019-04-23T08:46:12Z'
                 type:
                     description: 'Type of the event. See [Events](#tag/Events) for a description of all types.'
                     type: string
+                source:
+                    description: Source of the event.
+                    type: string
+                    example: system
             discriminator:
                 propertyName: type
                 mapping:
