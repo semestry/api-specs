@@ -88,7 +88,7 @@ info:
         name: API Support
         url: 'https://mytimetable.net'
         email: support@eveoh.nl
-    version: 1.0.3
+    version: 1.0.4
 servers:
     -   url: 'https://{baseUrl}'
         description: The URL of your server listening for Webhook calls.
@@ -532,7 +532,9 @@ tags:
             ````json
             {
                 "id": "f9d421d5-63e3-4724-8a21-d7d81d81417a",
+                "timestamp": "2019-04-23T08:46:12Z",
                 "type": "notification_batch.created",
+                "source": "system",
                 "data": {
                     "type": "timetable_change",
                     "user": "john.doe@example.org",
